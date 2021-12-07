@@ -19,7 +19,7 @@ public class SocketGroup extends Thread {
 
     private  final ConcurrentLinkedQueue <MessageUnit> groupMessages = new ConcurrentLinkedQueue<>();
     private final ConcurrentHashMap <Socket, ClientUnit> clients = new ConcurrentHashMap<>();
-    private final InputSocketListener inThread = new InputSocketListener(clients, groupMessages);
+    private final InputSocketListener inThread = new InputSocketListener(clients, groupMessages, broadcastMessages);
     private final OutputSocketSender outThread = new OutputSocketSender(clients, groupMessages);
 
 
@@ -36,11 +36,10 @@ public class SocketGroup extends Thread {
 
     private void initGroup () {
         //Тред, который принимает данные у группы клиентов
-        inThread.setBroadcastQueue (broadcastMessages);
         inThread.start ();
 
         //И тред, который отправляет данные группе
-        outThread.setBroadcastQueue (broadcastMessages);
+        outThread.setBroadcastQueue (broadcastMessages); //ToDo Перенести в конструктор
         outThread.start ();
     }
 

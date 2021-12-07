@@ -1,6 +1,8 @@
 package dz.chat.server.iothreads;
 
 import dz.chat.server.Server;
+import dz.chat.server.managers.MessageManager;
+import dz.chat.server.messages.InputMessageProcessor;
 import dz.chat.server.models.ClientUnit;
 import dz.chat.server.models.MessageUnit;
 
@@ -14,11 +16,17 @@ public class InputSocketListener extends Thread {
     private final ConcurrentHashMap<Socket, ClientUnit> clients;
     private final ConcurrentLinkedQueue<MessageUnit> groupMessages;
     private static ConcurrentLinkedQueue<MessageUnit> broadcastQueue;
+    private final MessageManager msgMngr;
 
     public InputSocketListener(ConcurrentHashMap<Socket, ClientUnit> clients,
-                               ConcurrentLinkedQueue<MessageUnit> groupMessages) {
+                               ConcurrentLinkedQueue<MessageUnit> groupMessages,
+                               ConcurrentLinkedQueue<MessageUnit> broadcastMessageQueue) {
+        if (broadcastQueue != null) {
+            broadcastQueue = broadcastMessageQueue;
+        }
         this.clients = clients;
         this.groupMessages = groupMessages;
+        msgMngr = new MessageManager(groupMessages, broadcastQueue);
     }
 
     @Override
@@ -30,7 +38,7 @@ public class InputSocketListener extends Thread {
                     if (cu.getIn().available() > 0) {
                         processMessage (cu);
                     } else if (System.currentTimeMillis() - cu.getLastMessageTime() > Server.IDLE_TIMEOUT) {
-                        disconnectClient(cu); //Отключаем не отвечающего клиента
+                        disconnectClient(cu); //Отключаем долго не отвечающего клиента
                     }
                 } catch (RuntimeException e) {
                     continue;
@@ -47,12 +55,16 @@ public class InputSocketListener extends Thread {
             if (clientUnit.isAuthOK()) {
                 msgIn = clientUnit.getIn().readUTF();
                 clientUnit.setLastMessageTime(System.currentTimeMillis());
-                //ToDo распарсить строку
             } else {
+                //Если клиент не успел аутентифицироваться, то отключаем его
                 if (System.currentTimeMillis() - clientUnit.getConnectionTime() > Server.AUTH_TIMEOUT) {
                     disconnectClient(clientUnit);
+                    return;
+                } else {
+                    msgIn = clientUnit.getIn().readUTF();
                 }
             }
+            msgMngr.pushMessage (msgIn, clientUnit);
         } catch (RuntimeException e) {
             e.printStackTrace();
         } catch (Exception e) {
@@ -92,9 +104,4 @@ public class InputSocketListener extends Thread {
         }
     }
 
-    public void setBroadcastQueue(ConcurrentLinkedQueue<MessageUnit> broadcastMessageQueue) {
-        if (broadcastQueue != null) {
-            broadcastQueue = broadcastMessageQueue;
-        }
-    }
 }

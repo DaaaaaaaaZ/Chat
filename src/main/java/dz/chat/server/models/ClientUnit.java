@@ -18,7 +18,7 @@ public class ClientUnit {
         this.out = out;
         this.in = in;
         this.connectionTime = connectionTime;
-        lastMessageTime = connectionTime;
+        lastMessageTime = connectionTime; //Если клиент не прислал ни одного сообщения, то считаем время одинаково
         isAuthOK = false;
     }
 
