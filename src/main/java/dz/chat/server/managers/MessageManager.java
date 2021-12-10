@@ -16,7 +16,8 @@ public class MessageManager extends Thread {
     private final ConcurrentLinkedQueue<MessageUnit> groupMessages;
     private final ConcurrentLinkedQueue<MessageUnit> broadcastMessages;
 
-    public MessageManager(ConcurrentLinkedQueue<MessageUnit> groupMessages, ConcurrentLinkedQueue<MessageUnit> broadcastQueue) {
+    public MessageManager(ConcurrentLinkedQueue<MessageUnit> groupMessages,
+                          ConcurrentLinkedQueue<MessageUnit> broadcastQueue) {
         queries = Executors.newCachedThreadPool();
         waiters = Executors.newCachedThreadPool();
         this.broadcastMessages = broadcastQueue;
@@ -28,5 +29,13 @@ public class MessageManager extends Thread {
     public void pushMessage(String msgIn, ClientUnit clientUnit) {
         MessageUnit mu;
         mu = inputProcessor.unparseMessage (msgIn, clientUnit);
+        if (mu != null) {
+            switch (mu.getType()) {
+                case BROADCAST: {
+                    broadcastMessages.add(mu);
+                }
+                break;
+            }
+        }
     }
 }

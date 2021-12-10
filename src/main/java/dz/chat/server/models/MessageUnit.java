@@ -7,7 +7,6 @@ import java.io.DataOutputStream;
 
 public class MessageUnit {
     private String message;
-    private DataOutputStream out;
     private ClientUnit source;
     private String target;
     private volatile boolean isUsing = false;
@@ -19,7 +18,6 @@ public class MessageUnit {
 
     public void reset () {
         message = null;
-        out = null;
         source = null;
         target = null;
         isUsing = false;
@@ -40,15 +38,6 @@ public class MessageUnit {
     public void setMessage(String message) {
         isUsing = true;
         this.message = message;
-    }
-
-    public DataOutputStream getOut() {
-        return out;
-    }
-
-    public void setOut(DataOutputStream out) {
-        isUsing = true;
-        this.out = out;
     }
 
     public ClientUnit getSource() {

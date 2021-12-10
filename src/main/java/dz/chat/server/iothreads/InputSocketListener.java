@@ -21,7 +21,7 @@ public class InputSocketListener extends Thread {
     public InputSocketListener(ConcurrentHashMap<Socket, ClientUnit> clients,
                                ConcurrentLinkedQueue<MessageUnit> groupMessages,
                                ConcurrentLinkedQueue<MessageUnit> broadcastMessageQueue) {
-        if (broadcastQueue != null) {
+        if (broadcastQueue == null) {
             broadcastQueue = broadcastMessageQueue;
         }
         this.clients = clients;

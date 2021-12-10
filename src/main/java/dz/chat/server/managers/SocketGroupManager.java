@@ -37,8 +37,16 @@ public class SocketGroupManager extends Thread {
                     //Проверяем очередь новых сокетов
                     //Отправлям новый сокет далее
                     pushSocketToGroup (incomingSockets.poll());
+                }
+
+                if (!broadcastMessages.isEmpty()) {
+                    MessageUnit mu = broadcastMessages.poll();
+                    //Раскидываем по группам broadcast сообщения
+                    for (Map.Entry<Integer, SocketGroup> pair : threadGroups.entrySet()) {
+                        pair.getValue().getGroupMessages().add (mu);
+                    }
                 } else {
-                    sleep(100);
+                    sleep(20);
                 }
             }
         } catch (InterruptedException e) {
