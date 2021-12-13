@@ -9,6 +9,7 @@ import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class MessagesPool extends Thread {
+    public static String MSG_NEED_AUTH = "Для входа в чат введите логин и пароль";
     private final ConcurrentLinkedQueue <MessageUnit> freeMessages;
     private final ConcurrentLinkedQueue <MessageUnit> busyMessages;
 
@@ -21,6 +22,17 @@ public class MessagesPool extends Thread {
 
     public MessageUnit obtain(String msgIn, ClientUnit source) {
         return obtain(msgIn, MsgUnitType.BROADCAST, source, null); //broadcast
+    }
+
+    public MessageUnit obtain (MsgUnitType type, ClientUnit source) {
+        switch (type) {
+            case NEED_AUTH: {
+                return obtain(MSG_NEED_AUTH, MsgUnitType.NEED_AUTH, source, null);
+            }
+            default: {
+                return obtain(null, type, source, null);
+            }
+        }
     }
 
     public MessageUnit obtain (String msgIn, MsgUnitType type, ClientUnit source, String targetNick) {

@@ -33,9 +33,16 @@ public class MessageManager extends Thread {
             switch (mu.getType()) {
                 case BROADCAST: {
                     broadcastMessages.add(mu);
-                }
-                break;
+                } break;
+                case NEED_AUTH: {
+                    groupMessages.add (mu);
+                } break;
+                case NEED_QUERY: {
+
+                } break;
             }
         }
     }
+
+    private class
 }
